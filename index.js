@@ -9,7 +9,6 @@ app.use(bodyParser.raw());
 
 const ipfsClient = require('ipfs-http-client');
 const goIPFS = ipfsClient('localhost', '5001', { protocol: 'http' });
-const jsIPFS = ipfsClient('localhost', '5002', { protocol: 'http' });
 
 const { CIDHOOK_SECRET_PATH } = process.env;
 if (CIDHOOK_SECRET_PATH && !fs.existsSync(CIDHOOK_SECRET_PATH)) {
@@ -36,7 +35,7 @@ app.use((req, res, next) => {
 app.post('/', async (req, res) => {
   try {
     const data = Buffer.from(req.body);
-    const result = await jsIPFS.add(data);
+    const result = await goIPFS.add(data);
     const cid = result[0].path;
     console.log(`Added cid ${cid}`);
     await goIPFS.add(data);
@@ -53,7 +52,6 @@ app.post('/', async (req, res) => {
 app.post('/:cid', async (req, res) => {
   try {
     console.log(`Pinning cid ${req.params.cid}`);
-    await jsIPFS.pin.add(req.params.cid);
     await goIPFS.pin.add(req.params.cid);
     res.status(204).end();
   } catch (err) {
@@ -64,7 +62,6 @@ app.post('/:cid', async (req, res) => {
 app.delete('/:cid', async (req, res) => {
   try {
     console.log(`Unpinning cid ${req.params.cid}`);
-    await jsIPFS.pin.rm(req.params.cid);
     await goIPFS.pin.rm(req.params.cid);
   } catch (_) {
   } finally {
