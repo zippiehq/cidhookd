@@ -1,37 +1,25 @@
-FROM golang:1.11.1-alpine3.8
-MAINTAINER Chance Hudson
+FROM node:10 AS builder
 
-# This is set in the CI as well, be sure to update in both places
-ARG IPFS_TAG="v0.4.17"
+WORKDIR /app
 
-ENV SRC_DIR /go/src/github.com/ipfs/go-ipfs
+COPY *.json /app/
 
-RUN apk add --no-cache git make bash gcc musl-dev \
-  && go get -u github.com/whyrusleeping/gx
+RUN npm install
 
-# Fixes an issue with symlinked binaries not playing well with musl
-# Thanks https://stackoverflow.com/questions/34729748/installed-go-binary-not-found-in-path-on-alpine-linux-docker
-RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
+# Generate third-party licenses file
+FROM node:10 AS licenses
+WORKDIR /app
+COPY --from=builder /app/node_modules /app/node_modules
+RUN npm install license-extractor
+RUN node_modules/license-extractor/bin/licext --mode output > /app/LICENSE.thirdparties.txt
 
-RUN git clone --branch $IPFS_TAG https://github.com/ipfs/go-ipfs.git $SRC_DIR \
-  && cd $SRC_DIR \
-  && make build
+FROM node:10
 
-FROM alpine:3.8
+WORKDIR /app
 
-RUN apk add --no-cache nodejs-npm git python g++ make && \
-  npm config set unsafe-perm true && \
-  npm install -g ipfs
+COPY --from=builder /app/node_modules /app/node_modules
 
-COPY . /src
-WORKDIR /src
+COPY *.js *.json /app/
 
-RUN npm ci && \
-  apk del --no-cache git python g++ make
-
-ENV SRC_DIR /go/src/github.com/ipfs/go-ipfs
-COPY --from=0 $SRC_DIR/cmd/ipfs/ipfs /usr/local/bin/ipfs
-
-COPY ./daemon.sh /daemon.sh
-
-ENTRYPOINT ["/daemon.sh"]
+# Extract licenses
+COPY --from=licenses /app/LICENSE.thirdparties.txt /app/LICENSE.thirdparties.txt
