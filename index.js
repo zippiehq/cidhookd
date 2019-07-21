@@ -5,10 +5,14 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 
+const port = process.env.PORT || 3000
+const ipfsHost = process.env.BACKEND_IPFS_HOST || 'localhost'
+const ipfsPort = process.env.BACKEND_IPFS_PORT || 5001
+
 app.use(bodyParser.raw());
 
 const ipfsClient = require('ipfs-http-client');
-const goIPFS = ipfsClient('localhost', '5001', { protocol: 'http' });
+const goIPFS = ipfsClient(ipfsHost, ipfsPort, { protocol: 'http' });
 
 const { CIDHOOK_SECRET_PATH } = process.env;
 if (CIDHOOK_SECRET_PATH && !fs.existsSync(CIDHOOK_SECRET_PATH)) {
@@ -69,6 +73,10 @@ app.delete('/:cid', async (req, res) => {
   }
 });
 
-app
-  .listen(3000, () => console.log(`cidhookd listening on port 3000!`))
-  .setTimeout(1800 * 1000);
+console.log('Backend IPFS endpoint is %s:%s', ipfsHost, ipfsPort)
+
+const server = app.listen(port, '0.0.0.0', function() {
+  const host = server.address().address
+  const port = server.address().port
+  console.log('App listening at http://%s:%s', host, port)
+})
