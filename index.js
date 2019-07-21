@@ -51,8 +51,8 @@ app.post('/', async (req, res) => {
 
 app.post('/:cid', async (req, res) => {
   try {
-    console.log(`Pinning cid ${req.params.cid}`);
     await goIPFS.pin.add(req.params.cid);
+    console.log(`Pinning cid ${req.params.cid}`);
     res.status(204).end();
   } catch (err) {
     res.status(500).send(err.toString());
@@ -61,8 +61,8 @@ app.post('/:cid', async (req, res) => {
 
 app.delete('/:cid', async (req, res) => {
   try {
-    console.log(`Unpinning cid ${req.params.cid}`);
     await goIPFS.pin.rm(req.params.cid);
+    console.log(`Unpinning cid ${req.params.cid}`);
   } catch (_) {
   } finally {
     res.status(204).end();
