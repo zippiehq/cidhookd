@@ -73,6 +73,10 @@ app.delete('/:cid', async (req, res) => {
   }
 });
 
+app.get('/health', function(req, res) {
+  res.send(JSON.stringify({ status: 'READY' }))
+});
+
 console.log('Backend IPFS endpoint is %s:%s', ipfsHost, ipfsPort)
 
 const server = app.listen(port, '0.0.0.0', function() {
