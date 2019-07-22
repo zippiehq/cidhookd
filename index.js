@@ -8,27 +8,29 @@ const bodyParser = require('body-parser');
 const port = process.env.PORT || 3000
 const ipfsHost = process.env.BACKEND_IPFS_HOST || 'localhost'
 const ipfsPort = process.env.BACKEND_IPFS_PORT || 5001
+const secret = process.env.SECRET
+const sentryDsn = process.env.SENTRY_DSN
+
+if (sentryDsn) {
+  Sentry.init({
+    dsn: sentryDsn
+  })
+  logger.info(`Sentry error reporting started: ${sentryDsn}`)
+}
+
+if (!secret) {
+  console.log(`Secret not present. Refusing to start`);
+  process.exit(1);
+}
 
 app.use(bodyParser.raw());
 
 const ipfsClient = require('ipfs-http-client');
 const goIPFS = ipfsClient(ipfsHost, ipfsPort, { protocol: 'http' });
 
-const { CIDHOOK_SECRET_PATH } = process.env;
-if (CIDHOOK_SECRET_PATH && !fs.existsSync(CIDHOOK_SECRET_PATH)) {
-  console.log(`Invalid CIDHOOK_SECRET_PATH supplied: ${CIDHOOK_SECRET_PATH}`);
-  process.exit(1);
-}
-if (CIDHOOK_SECRET_PATH && !process.env.CIDHOOK_SECRET) {
-  const secret = fs.readFileSync(CIDHOOK_SECRET_PATH, 'utf8');
-  process.env.CIDHOOK_SECRET = secret.trim();
-}
-const { CIDHOOK_SECRET } = process.env;
-
 app.use((req, res, next) => {
-  if (!CIDHOOK_SECRET) return next();
   const auth = req.get('Authorization');
-  if (auth !== CIDHOOK_SECRET) {
+  if (auth !== secret) {
     res.statusCode = 401;
     next(new Error(`Invalid Authorization supplied: ${auth}`));
   } else {
