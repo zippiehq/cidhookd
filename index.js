@@ -65,15 +65,15 @@ app.post('/:cid', async (req, res) => {
   }
 });
 
-app.delete('/:cid', async (req, res) => {
-  try {
-    await goIPFS.pin.rm(req.params.cid);
-    console.log(`Unpinning cid ${req.params.cid}`);
-  } catch (_) {
-  } finally {
-    res.status(204).end();
-  }
-});
+//app.delete('/:cid', async (req, res) => {
+//  try {
+//    await goIPFS.pin.rm(req.params.cid);
+//    console.log(`Unpinning cid ${req.params.cid}`);
+//  } catch (_) {
+//  } finally {
+//    res.status(204).end();
+//  }
+//});
 
 app.get('/health', function(req, res) {
   res.send(JSON.stringify({ status: 'READY' }))
