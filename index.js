@@ -9,7 +9,7 @@ const Sentry = require('@sentry/node')
 const port = process.env.PORT || 3000
 const ipfsHost = process.env.BACKEND_IPFS_HOST || 'localhost'
 const ipfsPort = process.env.BACKEND_IPFS_PORT || 5001
-const secret = process.env.SECRET
+const secret = process.env.PINNER_SECRET
 const sentryDsn = process.env.SENTRY_DSN
 
 if (sentryDsn) {
