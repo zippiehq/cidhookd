@@ -4,6 +4,7 @@ const fs = require('fs');
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const Sentry = require('@sentry/node')
 
 const port = process.env.PORT || 3000
 const ipfsHost = process.env.BACKEND_IPFS_HOST || 'localhost'
@@ -15,7 +16,7 @@ if (sentryDsn) {
   Sentry.init({
     dsn: sentryDsn
   })
-  logger.info(`Sentry error reporting started: ${sentryDsn}`)
+  console.log(`Sentry error reporting started: ${sentryDsn}`)
 }
 
 if (!secret) {
