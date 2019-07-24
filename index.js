@@ -24,6 +24,10 @@ if (!secret) {
   process.exit(1);
 }
 
+app.get('/health', function(req, res) {
+  res.send(JSON.stringify({ status: 'READY' }))
+});
+
 app.use(bodyParser.raw());
 
 const ipfsClient = require('ipfs-http-client');
@@ -75,10 +79,6 @@ app.post('/:cid', async (req, res) => {
 //    res.status(204).end();
 //  }
 //});
-
-app.get('/health', function(req, res) {
-  res.send(JSON.stringify({ status: 'READY' }))
-});
 
 console.log('Backend IPFS endpoint is %s:%s', ipfsHost, ipfsPort)
 
