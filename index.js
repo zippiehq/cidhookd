@@ -28,7 +28,7 @@ app.get('/health', function(req, res) {
   res.send(JSON.stringify({ status: 'READY' }))
 });
 
-app.use(bodyParser.raw());
+app.use(bodyParser.raw({limit: '50mb'}));
 
 const ipfsClient = require('ipfs-http-client');
 const goIPFS = ipfsClient(ipfsHost, ipfsPort, { protocol: 'http' });
